@@ -1,0 +1,781 @@
+//ATM Code with some main functionalities
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+struct atm{
+    int cardNo;
+    int accNo;
+    int pinNo;
+    char Name[50];
+    int balance;
+    int dob;
+}at,atv;
+
+void add();
+void search();
+void dele();
+void show();
+void deposit();
+void withdraw();
+void balan();
+void changepin();
+void modify();
+void moneyTransfer();
+
+void add()
+{
+    FILE *fp1;
+    int acn;
+    int n;
+    fp1=fopen("admin.txt","a+");
+    printf("\t\t====== ADD  RECORD ======\n");
+    printf("\nEnter account number\n");
+    scanf("%d",&atv.accNo);
+    while(fscanf(fp1,"%d\t%s\t%d\t%d\t%d\t%d\n",&at.accNo,at.Name,&at.pinNo,&at.cardNo,&at.balance,&at.dob)!=EOF)//END OF THE FILE
+    {
+        if(atv.accNo==at.accNo)
+        {
+            printf("Account no. already in use\n");
+            exit(1);
+        }
+    }
+    printf("\nEnter account holder name\n");
+	scanf("%s",at.Name);
+
+	//int dd,mm,yy;
+
+    //printf("Enter date of Birth(DD/MM/YYYY format): ");
+    //scanf("%d/%d/%d",&dd,&mm,&yy);
+
+    //check year
+    /*if(yy>=1900 && yy<=9999)
+    {
+        //check month
+        if(mm>=1 && mm<=12)
+        {
+            //check days
+            if((dd>=1 && dd<=31) && (mm==1 || mm==3 || mm==5 || mm==7 || mm==8 || mm==10 || mm==12))
+                printf("Date is valid.\n");
+            else if((dd>=1 && dd<=30) && (mm==4 || mm==6 || mm==9 || mm==11))
+                printf("Date is valid.\n");
+            else if((dd>=1 && dd<=28) && (mm==2))
+                printf("Date is valid.\n");
+            else if(dd==29 && mm==2 && (yy%400==0 ||(yy%4==0 && yy%100!=0)))
+                printf("Date is valid.\n");
+            else
+                printf("Day is invalid.\n");
+        }
+        else
+        {
+            printf("Month is not valid.\n");
+        }
+    }
+    else
+    {
+        printf("Year is not valid.\n");
+    }*/
+	printf("\nEnter account pin\n");
+	scanf("%d",&at.pinNo);
+	printf("\nEnter card number\n");
+	scanf("%d",&at.cardNo);
+	printf("\nEnter some balance\n");
+	scanf("%d",&at.balance);
+
+    fprintf(fp1,"%d\t%s\t%d\t%d\t%d%d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance,at.dob);
+    fclose(fp1);
+    printf("Account created successfully!!!\n");
+    printf("You want to open one more account or exit\n");
+    printf("press '1' for one more account and '2' for exit\n");
+    scanf("%d",&n);
+    switch(n)
+    {
+        case 1:add();
+                break;
+        case 2:exit(1);
+        default:printf("Wrong choice\n");
+    }
+
+
+}
+void search()
+{
+	FILE *fp5;
+    int test=1,ac;
+	fp5=fopen("admin.txt","r+");
+	if(fp5==NULL)
+    {
+			printf("\nFile cant be opened\n");
+			exit(0);
+	}
+	printf("\nEnter the Account number \n");
+	scanf("%d",&atv.accNo);
+    printf("\n    AC.NO\t\t\tNAME\t\t\tPin Num\t\t\tCd Num\t\t\tBalance\n");
+    while (fscanf(fp5,"%d\t%s\t%d\t%d\t%d\n",&at.accNo,at.Name,&at.pinNo,&at.cardNo,&at.balance)!=EOF)
+        {
+           // printf("***");
+            if(atv.accNo==at.accNo)
+            {
+                test=1;
+                printf("Record is found\n");
+                printf("\n %10d   \t\t%10s  \t\t%10d  \t\t%10d  \t\t%10d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+            }
+           if(test==0)
+           {
+               printf("Record not found\n");
+           }
+           else {
+
+           }
+
+        }
+        fclose(fp5);
+}
+void dele()
+{
+    FILE *fp3,*fp4,ac;
+    int test=0;
+    fp3=fopen("admin.txt","r+");
+    fp4=fopen("bankTemp.txt","w+");
+    printf("Enter the account no. of user you want to delete\n");
+    scanf("%d",&atv.accNo);
+    while(fscanf(fp3,"%d  %s  %d  %d  %d\n",&at.accNo,at.Name,&at.pinNo,&at.cardNo,&at.balance)!=EOF)
+         {
+            if(at.accNo==atv.accNo)
+            {
+            test=1;
+            }//if
+            else
+            {
+            fprintf(fp4,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+            }//el
+         } //wh
+        fclose(fp3);
+        fclose(fp4);
+        if(test)
+        {
+            fp4=fopen("bankTemp.txt","r");
+            fp3=fopen("admin.txt","w");
+             while(fscanf(fp3,"%d  %s  %d  %d  %d\n",&at.accNo,at.Name,&at.pinNo,&at.cardNo,&at.balance)!=EOF)
+             {
+                fprintf(fp4,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+             }//whi
+             fclose(fp3);
+             fclose(fp4);
+        }//if
+
+        else
+        {
+            printf("\nRecord not found\n");
+            exit(1);
+        }//
+        remove("admin.txt");
+        rename("bankTemp.txt","bankAdmin.txt");
+}
+void modify()
+{
+ FILE *fp1,*fp2;
+    int flag=0,cd,pn,chance=3,bal,nwac,nwPn,nwcd,i;
+    char newNa[40];
+    fp1=fopen("admin.txt","r");
+    fp2=fopen("bankTemp.txt","w");
+    if(fp1==NULL)
+    {
+        printf("cant open file");
+        exit(0);
+    }//if
+    printf("Enter your card number\n");
+    scanf("%d",&cd);
+    while(fscanf(fp1,"%d  %s  %d  %d  %d\n",&at.accNo,at.Name,&at.pinNo,&at.cardNo,&at.balance)!=EOF)
+    {
+       // printf("**");
+        //printf("users pin number is %d\n",at.pinNo);
+        if(cd==at.cardNo)
+        {
+            flag=1;
+            while(chance>0)
+            {
+                printf("Enter Pin Number\n");
+                scanf("%d",&pn);
+                if(pn==at.pinNo)
+                {
+                    printf("welcome %s u have sucessfully logged in\n",at.Name);
+                    printf("Enter new account number :\n");
+                    scanf("%d",&nwac);
+                    at.accNo=nwac;
+                    printf("Enter new Name :\n");
+                    scanf("%s",newNa);
+                    //for( i=0;at.Name[i]!='\0';i++)
+                    ////{
+                     //   newNa[i]=at.Name[i];
+                    //}
+                   // newNa[i]='\0';
+                    strcpy(at.Name,newNa);
+                    printf("Enter new pin Number  number :\n");
+                    scanf("%d",&nwPn);
+                    at.pinNo=nwPn;
+                    printf("Enter new card number:\n");
+                    scanf("%d",&nwcd);
+                    at.cardNo=nwcd;
+                    printf("Your current balance is %d\n",at.balance);
+                    fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+                    break;
+                }//if
+                else if(chance>1)
+                {
+                    printf("wrong pin number ... try again\n");
+                    chance -=1;
+                }//elif
+                else
+                {
+                    printf("Invalid password\n");
+                    fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+                    break;
+                }//el
+            }//wh
+        }//if
+            else
+            {
+                fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+            }//el
+        }//wh
+        fclose(fp1);
+        fclose(fp2);
+        if(flag==0)
+        {
+            printf("Invalid card number\n");
+        }//if
+        remove("admin.txt");
+        rename("bankTemp.txt","bankAdmin.txt");
+}
+void show()
+{
+    FILE *fp2;
+    int test=0;
+    fp2=fopen("admin.txt","r+");
+    printf("\n    AC.NO\t\t\tNAME\t\t\tPin Num\t\t\tCd Num\t\t\tBalance\n");
+
+    while(fscanf(fp2,"%d  %s  %d  %d  %d\n",&at.accNo,at.Name,&at.pinNo,&at.cardNo,&at.balance)!=EOF)
+       {
+
+           printf("\n %10d   \t\t%10s  \t\t%10d  \t\t%10d  \t\t%10d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+           printf("\n\n");
+           test++;
+       }
+       fclose(fp2);
+       if (test==0)
+        {
+            printf("\nNO RECORDS!!\n");
+        }
+}
+void user(){
+    int n;
+    printf("Welcome to ATM\n");
+    printf("1.deposit\n2.withdraw\n3.balanceCheck\n4.pin change\n5.Money transfer\n6.Exit\n");
+    scanf("%d",&n);
+    switch(n)
+    {
+        case 1:deposit();
+                break;
+        case 2:withdraw();
+                break;
+        case 3:balan();
+                break;
+        //case 4:moneyTransfer();
+          //      break;
+        case 4:changepin();
+                break;
+        case 6:exit(1);
+        default:printf("Wrong choice\n");
+               // goto user();
+    }
+
+}
+void deposit()
+{
+    FILE *fp1,*fp2;
+    int flag=0,cd,pn,chance=3,bal;
+    fp1=fopen("admin.txt","r");
+    fp2=fopen("bankTemp.txt","w");
+    if(fp1==NULL)
+    {
+        printf("cant open file");
+        exit(0);
+    }//if
+    printf("Enter your card number\n");
+    scanf("%d",&cd);
+    while(fscanf(fp1,"%d  %s  %d  %d  %d\n",&at.accNo,at.Name,&at.pinNo,&at.cardNo,&at.balance)!=EOF)
+    {
+      //  printf("**");
+       // printf("users pin number is %d",at.pinNo);
+        if(cd==at.cardNo)
+        {
+            flag=1;
+            while(chance>0)
+            {
+                printf("Enter Pin Number\n");
+                scanf("%d",&pn);
+                if(pn==at.pinNo)
+                {
+                    printf("welcome %s u have sucessfully logged in\n",at.Name);
+                    printf("Enter amount to deposit\n");
+                    scanf("%d",&bal);
+                    at.balance+=bal;
+                    printf("Your current balance is %d\n",at.balance);
+                    fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+                    break;
+                }//if
+                else if(chance>1)
+                {
+                    printf("WRONG PIN NUMBER\n PLEASE ENTER CORRECT PIN\n");
+                    chance -=1;
+                }//elif
+                else
+                {
+                    printf("Invalid password\n");
+                    fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+                    break;
+                }//el
+            }//wh
+        }//if
+            else
+            {
+                fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+            }//el
+        }//wh
+        fclose(fp1);
+        fclose(fp2);
+        if(flag==0)
+        {
+            printf("Invalid card number\n");
+        }//if
+        remove("admin.txt");
+        rename("bankTemp.txt","admin.txt");
+
+}
+void withdraw()
+{
+     FILE *fp1,*fp2;
+    int flag=0,cd,pn,chance=3,bal;
+    fp1=fopen("admin.txt","r");
+    fp2=fopen("bankTemp.txt","w");
+    if(fp1==NULL)
+    {
+        printf("cant open file");
+        exit(0);
+    }//if
+    printf("Enter your card number\n");
+    scanf("%d",&cd);
+    while(fscanf(fp1,"%d  %s  %d  %d  %d\n",&at.accNo,at.Name,&at.pinNo,&at.cardNo,&at.balance)!=EOF)
+    {
+
+       // printf("users pin number is %d",at.pinNo);
+        if(cd==at.cardNo)
+        {
+            flag=1;
+            while(chance>0)
+            {
+                printf("Enter Pin Number\n");
+                scanf("%d",&pn);
+                if(pn==at.pinNo)
+                {
+                    printf("welcome %s u have sucessfully logged in\n",at.Name);
+                    printf("Enter amount to deposit\n");
+                    scanf("%d",&bal);
+                    at.balance-=bal;
+                    printf("Your current balance is %d\n",at.balance);
+                    fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+                    break;
+                }//if
+                else if(chance>1)
+                {
+                    printf("wron pin number ... try again\n");
+                    chance -=1;
+                }//elif
+                else
+                {
+                    printf("INVALID PASSWORD\n");
+                    fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+                    break;
+                }//el
+            }//wh
+        }//if
+            else
+            {
+                fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+            }//el
+        }//wh
+        fclose(fp1);
+        fclose(fp2);
+        if(flag==0)
+        {
+            printf("INVALID CARD NUMBER\n");
+        }//if
+        remove("admin.txt");
+        rename("bankTemp.txt","admin.txt");
+}
+void balan()
+{
+    FILE *fp1,*fp2;
+    int flag=0,cd,pn,chance=3,bal;
+    fp1=fopen("admin.txt","r");
+    fp2=fopen("bankTemp.txt","w");
+    if(fp1==NULL)
+    {
+        printf("CAN'T OPEN FILE\n");
+        exit(0);
+    }//if
+    printf("ENTER YOUR CARD NUMBER\n");
+    scanf("%d",&cd);
+    while(fscanf(fp1,"%d  %s  %d  %d  %d\n",&at.accNo,at.Name,&at.pinNo,&at.cardNo,&at.balance)!=EOF)
+    {
+
+       // printf("users pin number is %d",at.pinNo);
+        if(cd==at.cardNo)
+        {
+            flag=1;
+            while(chance>0)
+            {
+                printf("ENTER PIN NUMBER\n");
+                scanf("%d",&pn);
+                if(pn==at.pinNo)
+                {
+                    printf("WELCOME %s YOU HAVE SUCCESSFULLY LOGGED IN\n",at.Name);
+                    printf("YOUR CURRENT BALANCE BE%d\n",at.balance);
+                    fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+                    break;
+                }//if
+                else if(chance>1)
+                {
+                    printf("wWRONG PIN NUMBER\n PLEASE ENTER CORRECT PIN\n");
+                    chance -=1;
+                }//elif
+                else
+                {
+                    printf("INVALID PASSWORD\n");
+                    fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+                    break;
+                }//el
+            }//wh
+        }//if
+            else
+            {
+                fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+            }//el
+        }//wh
+        fclose(fp1);
+        fclose(fp2);
+        if(flag==0)
+        {
+            printf("INVALID CARD NUMBER\n");
+        }//if
+        remove("admin.txt");
+        rename("bankTemp.txt","bankAdmin.txt");
+}
+void moneyTransfer(){
+    int count=0,count1=0,amount;
+    int cradNo1,choice;
+    char temp[5] = ".txt";
+    char filename[20],filename1[20];
+    char ch;
+    strcpy( filename,at.cardNo);
+    strcat(filename,temp);
+    time_t t;
+    time(&t);
+
+    printf("--------------------------------------------------\n");
+    printf("*Enter the 6 digit card number of the recipient : \n");
+    printf("--------------------------------------------------\n");
+    scanf("%d",&cradNo1);
+    sprintf(filename1,"%d",cradNo1);
+
+    printf("---------------------------------------\n");
+    printf("*Enter the amount to be transferred :  \n");
+    printf("---------------------------------------\n");
+    scanf("%d",&amount);
+
+    FILE *fp9 = fopen(filename,"r+");
+
+     while((ch = fgetc(fp9)) != EOF){
+        if(ch == '\n')
+            count++;
+    }
+    fseek(fp9,0,SEEK_SET);
+
+    strcat(filename1,temp);
+    FILE *fp10 = fopen(filename1,"r+");
+
+     while((ch = fgetc(fp10)) != EOF){
+        if(ch == '\n')
+            count1++;
+    }
+    fseek(fp10,0,SEEK_SET);
+
+    if(fp10 == NULL ){
+        printf("card number Invalid \n");
+        menuWindow();
+    }
+    else{
+        for( int i =0 ; i <= count ; i++ ){
+                fscanf(fp9,"%s",u.mode);
+	            fscanf(fp9,"%s",u.transNo);
+                fscanf(fp9,"%s",u.deposit);
+                fscanf(fp9,"%s",u.withdraw);
+	            fscanf(fp9,"%s",u.balance);
+	            fscanf(fp9,"%s",u.day);
+	            fscanf(fp9,"%s",u.month);
+	            fscanf(fp9,"%s",u.date);
+	            fscanf(fp9,"%s",u.time);
+	            fscanf(fp9,"%s",u.year);
+            }
+            if( atoi(u.balance) > amount){
+
+                FILE *fp11 = fopen("Details.txt","r");
+
+                while((ch = fgetc(fp11)) != EOF){
+                if( ch == '\n')
+                    count++;
+                }
+                fseek(fp11,0,SEEK_SET);
+
+                for( int i=0 ; i <= count ; i++ ){
+                    fscanf(fp11,"%s",a.fname);
+                    fscanf(fp11,"%s",a.mname);
+                    fscanf(fp11,"%s",a.lname);
+                    fscanf(fp11,"%s",a.icardNo);
+                    fscanf(fp11,"%s",a.pin);
+                    fscanf(fp11,"%s",a.phoneNo);
+
+                    // atoi --> convering STRING to INTEGER
+                    if(cradNo1 == atoi(a.icardNo)){
+                        printf(" Confirm transfer amount to MR/MRS %s %s %s's account ? \n",a.fname,a.mname,a.lname);
+                        printf(" 1.YES              2.NO  \n");
+                        scanf("%d",&choice);
+
+                        if(choice == 1 ){
+                            int result = atoi(u.balance) - amount;
+                            printf("--------------------------------------------------------------------------------\n");
+                            printf("* Rs %d has been debited from your account on %s\n",amount,ctime(&t));
+                            printf("---------------------------------------------------------------------------------\n");
+                            int trans = atoi(u.transNo);
+                            trans++;
+                            sprintf(u.transNo,"%d",trans);
+                            sprintf(u.balance,"%d",result);
+                            sprintf(u.withdraw,"%d",amount);
+                            strcpy(u.deposit,"0");
+
+                            fprintf(fp9,"%-10s","Ac/Trans");
+                            fprintf(fp9,"%-10s",u.transNo);
+                            fprintf(fp9,"%-10s",u.deposit);
+                            fprintf(fp9,"%-10s",u.withdraw);
+                            fprintf(fp9,"%-10s",u.balance);
+                            fprintf(fp9,ctime(&t));
+
+                            for( int i =0 ; i <= count1 ; i++ ){
+                                fscanf(fp10,"%s",u.mode);
+	                            fscanf(fp10,"%s",u.transNo);
+                                fscanf(fp10,"%s",u.deposit);
+                                fscanf(fp10,"%s",u.withdraw);
+	                            fscanf(fp10,"%s",u.balance);
+	                            fscanf(fp10,"%s",u.day);
+	                            fscanf(fp10,"%s",u.month);
+	                            fscanf(fp10,"%s",u.date);
+	                            fscanf(fp10,"%s",u.time);
+	                            fscanf(fp10,"%s",u.year);
+                            }
+                            int result1 = atoi(u.balance) + amount;
+                            int trans1 = atoi(u.transNo);
+                            trans1++;
+
+                            sprintf(u.transNo,"%d",trans1);
+                            sprintf(u.balance,"%d",result1);
+                            sprintf(u.deposit,"%d",amount);
+                            strcpy(u.withdraw,"0");
+
+                            fprintf(fp10,"%-10s","Ac/Trans");
+                            fprintf(fp10,"%-10s",u.transNo);
+                            fprintf(fp10,"%-10s",u.deposit);
+                            fprintf(fp10,"%-10s",u.withdraw);
+                            fprintf(fp10,"%-10s",u.balance);
+                            fprintf(fp10,ctime(&t));
+
+                            fclose(fp10);
+                            fclose(fp9);
+                            menuWindow();
+                        }
+                    else{
+                        menuWindow();
+                    }
+                }
+                else{
+                    continue;
+                }
+            }
+
+        }
+        else{
+            printf("Insufficient balance !!\n");
+            menuWindow();
+        }
+    }
+}
+/*void MoneyTransfer()
+{
+    int cd,pn,flag=0,chance=3,bal,ac,newam;
+    FILE *fp1,*fp2;
+    fp1=fopen("bankAdmin.txt","r");
+    fp2=fopen("bankTemp.txt","w");
+    if(fp1==NULL)
+    {
+        printf("file cant open\n");
+        exit(0);
+    }
+    printf("Enter your card number\n");
+    scanf("%d",&cd);
+    while(fscanf(fp1,"%d  %s  %d  %d  %d\n",&at.accNo,at.Name,&at.pinNo,&at.cardNo,&at.balance)!=EOF)
+    {
+
+       // printf("users pin number is %d",at.pinNo);
+        if(cd==at.cardNo)
+        {
+            flag=1;
+            while(chance>0)
+            {
+                printf("Enter Pin Number\n");
+                scanf("%d",&pn);
+                if(pn==at.pinNo)
+                {
+                    printf("welcome %s u have sucessfully logged in\n",at.Name);
+                    printf("Your current balance is %d\n",at.balance);
+                    printf("Enter the account no to transfer the amount\n");
+                    scanf("%d",&atv.accNo);
+                    if(atv.accNo==at.accNo)
+                    {
+                       while(fscanf(fp1,"%d  %s  %d  %d  %d\n",&at.accNo,at.Name,&at.pinNo,&at.cardNo,&at.balance)!=EOF)
+                        printf("Enter the amount to transfer :\n");
+                        scanf("%d",&newam);
+                        at.balance+=newam;
+                        printf("Balance %d is transfered sucessfully :\n",newam);
+
+                    }
+
+}
+*/
+void changepin()
+{
+    FILE *fp1,*fp2;
+    int flag=0,cd,pn,chance=3,bal,nwPn;
+    fp1=fopen("admin.txt","r");
+    fp2=fopen("bankTemp.txt","w");
+    if(fp1==NULL)
+    {
+        printf("CAN'T OPEN FILE\n");
+        exit(0);
+    }//if
+    printf("ENTER YOUR CARD NUMBER\n");
+    scanf("%d",&cd);
+    while(fscanf(fp1,"%d  %s  %d  %d  %d\n",&at.accNo,at.Name,&at.pinNo,&at.cardNo,&at.balance)!=EOF)
+    {
+
+       // printf("users pin number is %d",at.pinNo);
+        if(cd==at.cardNo)
+        {
+            flag=1;
+            while(chance>0)
+            {
+                printf("ENTER PIN NUMBER\n");
+                scanf("%d",&pn);
+                if(pn==at.pinNo)
+                {
+                    printf("WELCOME %s YOU HAVE SUCCESFULLY LOGGED N\n",at.Name);
+                    printf("ENTER NEW PIN NUMBER\n");
+                    scanf("%d",&nwPn);
+                    at.pinNo=nwPn;
+                    printf("YOUR NEW PIN IS %d\n",at.pinNo);
+                    fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+                    break;
+                }//if
+                else if(chance>1)
+                {
+                    printf("WRONG PIN NUMBER\nPLEASE ENTER CORRECT PIN\n");
+                    chance -=1;
+                }//elif
+                else
+                {
+                    printf("INVALID PASSWORD\n");
+                    fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+                    break;
+                }//el
+            }//wh
+        }//if
+            else
+            {
+                fprintf(fp2,"%d  %s  %d  %d  %d\n",at.accNo,at.Name,at.pinNo,at.cardNo,at.balance);
+            }//el
+        }//wh
+        fclose(fp1);
+        fclose(fp2);
+        if(flag==0)
+        {
+            printf("Invalid card number\n");
+        }//if
+        remove("admin.txt");
+        rename("bankTemp.txt","admin.txt");
+}
+int main()
+{
+    int n,pas=10,id,cardNo;
+    for(;;)
+    {
+    printf("\n\t\t\t\t--------------------------------------------\t\t\t\t\n");
+    printf("\n\t\t\t\t******* WELCOME TO KARNATAKA BANK LTD*******\t\t\t\t\n");
+    printf("\n\t\t\t\t--------------------------------------------\t\t\t\t\n");
+    printf("\t\t\t\tLOGIN AS\t\t\t\t\n");
+    printf("\t\t\t\t1.ADMIN\t\t\t\t\n");
+    printf("\t\t\t\t2.USER\t\t\t\t\n");
+    printf("\t\t\t\t3.EXIT\t\t\t\t\n");
+    printf("\n\t\t\t\t--------------------------------------------\t\t\t\t\n");
+    printf("Enter your choice\n");
+    scanf("%d",&n);
+    switch(n)
+    {
+        case 1:printf("\t\t\t\t~:ADMIN BLOCK:~\t\t\t\t\n");
+               printf("Enter your ID and password\n");
+               scanf("%d %d",&id,&pas);
+               if(id==123 && pas ==123)
+               {
+                   printf("\t\t\t\t||Successfully logged In||\t\t\t\t\n");
+                   printf("Enter operation you want to perform\n");
+                   printf("\n1.ADD ACCOUNT\n2.SEARCH USER BY ACCOUNT NUMBER\n3.DELETE USER DETAILS\n4.SHOW ALL DETAILS\n5.MODIFY ACCOUNT\n6.Money Transfer\n7.Exit\n");
+                   scanf("%d",&n);
+                   switch(n)
+                   {
+                       case 1:add();
+                                break;
+                        case 2:search();
+                                break;
+                        case 3:dele();
+                                break;
+                        case 4:show();
+                                break;
+                        case 5:modify();
+                                break;
+                        case 6:moneyTransfer();
+                                break;
+                        case 7:exit(1);
+
+                        default:printf("\t\t\t\t\nWrong choice\nEnter correct choice\t\t\t\t\n");
+                   }
+                   break;
+               }
+               break;
+        case 2:user();
+                break;
+
+        case 3:exit(1);
+    }
+
+
+}
+}
